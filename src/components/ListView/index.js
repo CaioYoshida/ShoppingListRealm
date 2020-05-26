@@ -15,7 +15,7 @@ export default function ListView({ item, onPress, onLongPress }) {
 
   return (
     <Viewer onPress={onPress} onLongPress={onLongPress}>
-      <ListTitle>{item.name}</ListTitle>
+      <ListTitle>{item.title}</ListTitle>
       <ListDate>{dateFormatted}</ListDate>
     </Viewer>
   );

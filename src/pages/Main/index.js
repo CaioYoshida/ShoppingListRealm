@@ -3,8 +3,9 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Realm from 'realm';
 
-import database from '~/database/index';
+import { ListSchema } from '~/realm/schema';
 
 import { loadList } from '~/store/modules/list/actions';
 
@@ -75,14 +76,15 @@ export default function Main({ navigation }) {
   // loading lists from DB
   useEffect(() => {
     async function loadLists() {
-      const listCollection = await database.collections.get('lists');
-      const allLists = await listCollection.query().fetch();
-
-      if (allLists.length === 0) {
-        setLists([]);
-      } else {
-        setLists(allLists);
-      }
+      await Realm.open({ schema: [ListSchema] }).then((realm) => {
+        const allLists = [];
+        realm.objects('List').map((item) => allLists.push(item));
+        if (allLists.length === 4) {
+          setLists([]);
+        } else {
+          setLists(allLists);
+        }
+      });
     }
 
     loadLists();
@@ -90,13 +92,14 @@ export default function Main({ navigation }) {
 
   //creating a new list inside DB
   async function hanldeAddNewList() {
-    const listCollection = await database.collections.get('lists');
-
-    await database.action(async () => {
-      await listCollection.create((list) => {
-        list.name = newListName;
-        list.date = newListDate;
-        list.items = '[]';
+    await Realm.open({ schema: [ListSchema] }).then((realm) => {
+      realm.write(() => {
+        realm.create('List', {
+          id: Date.now(),
+          title: newListName,
+          date: newListDate,
+          products: '[]',
+        });
       });
     });
 
@@ -105,12 +108,11 @@ export default function Main({ navigation }) {
 
   //updategin an existing list from DB
   async function handleUpdateProduct() {
-    const listCollection = await database.collections.get('lists');
-    const item = await listCollection.find(updateListID);
+    await Realm.open({ schema: [ListSchema] }).then((realm) => {
+      const list = realm.objectForPrimaryKey('List', updateListID);
 
-    await database.action(async () => {
-      await item.update((list) => {
-        list.name = updateListName;
+      realm.write(() => {
+        list.title = updateListName;
         list.date = updateListDate;
       });
     });
@@ -122,11 +124,12 @@ export default function Main({ navigation }) {
 
   //deleting a list from DB
   async function hanldeDeleteProduct() {
-    const listCollection = await database.collections.get('lists');
-    const item = await listCollection.find(updateListID);
+    await Realm.open({ schema: [ListSchema] }).then((realm) => {
+      const list = realm.objectForPrimaryKey('List', updateListID);
 
-    await database.action(async () => {
-      await item.destroyPermanently();
+      realm.write(() => {
+        realm.delete(list);
+      });
     });
 
     setLoadListTrigger(!loadListTrigger);
@@ -160,7 +163,7 @@ export default function Main({ navigation }) {
       setToogleNewListContainer(false);
     }
     await setUpdateListID(item.id);
-    await setUpdateListName(item.name);
+    await setUpdateListName(item.title);
     await setUpdateListDate(item.date);
     await setToogleUpdateListContainer(true);
     UpdateListContainerRef.current.bounceInUp(1000);
@@ -188,16 +191,16 @@ export default function Main({ navigation }) {
             <ListView
               item={item}
               onPress={async () => {
-                await dispatch(loadList(item.items, item.id));
+                await dispatch(loadList(item.products, item.id));
                 navigation.navigate('List', {
-                  listName: item.name,
+                  listName: item.title,
                   listDate: item.date,
                 });
               }}
               onLongPress={() => moveUpdateListContainerUp(item)}
             />
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
         />
       </ListContainer>
       <AddButton onPress={moveNewListContainerUp} />

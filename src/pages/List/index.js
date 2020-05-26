@@ -1,13 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as Animatable from 'react-native-animatable';
+import Realm from 'realm';
 import { format } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 
-import database from '~/database/index';
+import { ListSchema } from '~/realm/schema';
 
 import {
   addToList,
@@ -65,6 +67,8 @@ export default function List({ route }) {
 
   useEffect(() => {
     async function loadProducts() {
+      console.log(list.products);
+
       await setProducts(list.products);
       await setListID(list.listID);
     }
@@ -75,13 +79,11 @@ export default function List({ route }) {
   //unload list if !isFocused
   useEffect(() => {
     async function unloadProducts() {
-      const listCollection = await database.collections.get('lists');
-      const item = await listCollection.find(listID);
-
       if (isFocused === false) {
-        await database.action(async () => {
-          await item.update((i) => {
-            i.items = JSON.stringify(products);
+        await Realm.open({ schema: [ListSchema] }).then((realm) => {
+          const item = realm.objectForPrimaryKey('List', listID);
+          realm.write(() => {
+            item.products = JSON.stringify(products);
           });
         });
 
@@ -89,7 +91,7 @@ export default function List({ route }) {
       }
     }
     unloadProducts();
-  }, [isFocused, listID, dispatch, products]);
+  }, [isFocused]);
 
   //creating a state for a new product
   const [newProductName, setNewProductName] = useState();
