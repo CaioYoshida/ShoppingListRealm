@@ -41,23 +41,6 @@ const UpdateListContainerAnimated = Animatable.createAnimatableComponent(
   UpdateListContainer,
 );
 
-/* const listas = [
-  {
-    id: '1',
-    title: 'Compras do mês',
-    date: '2020-05-28T18:56:00.045Z',
-    products:
-      '[{"id":"1","name":"Pepsi 2 litros","quantity":"1","unit":"un","check":false},{"id":"2","name":"Filé mignon","quantity":"500","unit":"g","check":true},{"id":"3","name":"Patinho","quantity":"1.5","unit":"kg","check":true},{"id":"4","name":"Pizza Sadia","quantity":"2","unit":"cx","check":false}]',
-  },
-  {
-    id: '2',
-    title: 'Pão de açúcar',
-    date: '2020-05-15T18:56:00.045Z',
-    products:
-      '[{"id":"1","name":"Manteiga","quantity":"1","unit":"un","check":false},{"id":"2","name":"Mussarela","quantity":"500","unit":"g","check":true},{"id":"3","name":"Salmão","quantity":"1.5","unit":"kg","check":true},{"id":"4","name":"Pizza Sadia","quantity":"2","unit":"cx","check":false}]',
-  },
-]; */
-
 export default function Main({ navigation }) {
   const dispatch = useDispatch();
 
@@ -137,7 +120,7 @@ export default function Main({ navigation }) {
     moveUpdateListContainerDown();
   }
 
-  // creating state to handle with animations
+  // creating references and state to handle with animations
   const NewListContainerRef = useRef();
   const UpdateListContainerRef = useRef();
   const [toogleNewListContainer, setToogleNewListContainer] = useState(false);

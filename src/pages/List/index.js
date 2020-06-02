@@ -67,8 +67,6 @@ export default function List({ route }) {
 
   useEffect(() => {
     async function loadProducts() {
-      console.log(list.products);
-
       await setProducts(list.products);
       await setListID(list.listID);
     }
@@ -98,6 +96,7 @@ export default function List({ route }) {
   const [newProductQuantity, setNewProductQuantity] = useState();
   const [newProductUnit, setNewProductUnit] = useState();
 
+  // function to add product to List
   async function handleAddToList() {
     await dispatch(
       addToList({
@@ -112,11 +111,19 @@ export default function List({ route }) {
     setNewProductUnit('');
   }
 
+  // function to remove products from list
   async function handleRemoveFromList() {
     await dispatch(removeFromList(updateProductID));
     moveUpdateProductContainerDown();
   }
 
+  //creaintg a state for product updates
+  const [updateProductID, setUpdateProductID] = useState();
+  const [updateProductName, setUpdateProductName] = useState();
+  const [updateProductQuantity, setUpdateProductQuantity] = useState();
+  const [updateProductUnit, setUpdateProductUnit] = useState();
+
+  // function to update products from list
   async function handleUpdateProductFromList() {
     await dispatch(
       updateProductFromList(
@@ -129,13 +136,7 @@ export default function List({ route }) {
     moveUpdateProductContainerDown();
   }
 
-  //creaintg a state for product updates
-  const [updateProductID, setUpdateProductID] = useState();
-  const [updateProductName, setUpdateProductName] = useState();
-  const [updateProductQuantity, setUpdateProductQuantity] = useState();
-  const [updateProductUnit, setUpdateProductUnit] = useState();
-
-  // creating state to handle with animations
+  // creating references and state to handle with animations
   const NewProductContainerRef = useRef();
   const UpdateProductContainerRef = useRef();
   const [toogleNewProductContainer, setToogleNewProductContainer] = useState(

@@ -1,3 +1,7 @@
+/**
+ * Creating database Schema
+ */
+
 const ListSchema = {
   name: 'List',
   primaryKey: 'id',
